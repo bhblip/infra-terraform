@@ -58,7 +58,7 @@ jobs:
             --compliance pci_4.0_aws \
             --output-formats html \
             --ignore-exit-code-3 \
-            --verbose || true
+            --verbose
       - uses: actions/upload-artifact@v4
         if: always()
         with:
