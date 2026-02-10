@@ -1,0 +1,17 @@
+title = "gitleaks"
+
+[allowlist]
+  paths = [
+    '''.terraform/.*''',
+    '''\.trivyignore''',
+  ]
+
+[[rules]]
+  id = "db-password"
+  regex = '''(?i)(db_password|database_password|db_pass)\s*=\s*["'][^"']+["']'''
+  tags = ["pci-dss", "password"]
+
+[[rules]]
+  id = "api-key"
+  regex = '''(?i)(api_key|apikey|api_secret)\s*=\s*["'][^"']+["']'''
+  tags = ["pci-dss", "api-key"]
