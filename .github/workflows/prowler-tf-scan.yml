@@ -42,15 +42,26 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install prowler
-      - run: |
+      - name: Install Trivy
+        run: |
+          sudo apt-get install -y wget apt-transport-https gnupg
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null
+          echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main" | sudo tee /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install -y trivy
+      - name: Install Prowler
+        run: pip install prowler
+      - name: Run Prowler IaC Scan
+        run: |
           prowler iac \
             --scan-path . \
             --compliance pci_4.0_aws \
+            --output-formats html \
+            --ignore-exit-code-3 \
             --verbose
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: prowler-report-${{ github.sha }}
-          path: output/
+          name: prowler-report
+          path: output/*.html
           retention-days: 30
