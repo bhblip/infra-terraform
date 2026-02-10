@@ -1,3 +1,14 @@
+terraform {
+  required_version = ">= 1.5.0"
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
 resource "aws_s3_bucket" "transaction_logs" {
   bucket = "payment-logs-prod-001"
   tags = {
@@ -55,14 +66,14 @@ resource "aws_security_group" "payment_processor_sg" {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = var.egress_cidr_blocks
   }
 
   egress {
     from_port   = 53
     to_port     = 53
     protocol    = "udp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = var.egress_cidr_blocks
   }
 }
 
@@ -87,4 +98,21 @@ resource "aws_instance" "payment_app" {
                 --query SecretString --output text)
               systemctl start payment-service
               EOF
+}
+
+variable "vpc_id" {
+  type = string
+}
+
+variable "admin_cidr_blocks" {
+  type = list(string)
+}
+
+variable "allowed_ingress_cidrs" {
+  type = list(string)
+}
+
+variable "egress_cidr_blocks" {
+  type    = list(string)
+  default = ["10.0.0.0/8"]
 }
